@@ -1,15 +1,16 @@
 # MudaClaro
 
-Landing en español para organizar mudanzas en Madrid y captar colaboradores durante el piloto.
+Landing del piloto para organizar mudanzas en Madrid y captar colaboradores.
 
 ## Uso local
+Abrir index.html. Incluye estilos, scripts e ilustraciones.
 
-Abrir index.html en el navegador. Todos los estilos, scripts e ilustraciones están incluidos.
+## Publicación
+GitHub Pages: rama main, carpeta raíz.
 
-## Publicación en GitHub Pages
+## Solicitudes
+Formulario en dos pasos para particulares y formulario breve para empresas e inmobiliarias. Envía la ficha y fotos asociadas a cada mueble a mudaclaro@gmail.com mediante FormSubmit, con su comprobación antispam. Máximo 5 MB por foto y 9 MB en conjunto.
 
-En Settings > Pages seleccionar Deploy from a branch, rama main y carpeta / (root).
+La cuenta receptora ha sido activada y FormSubmit ha aceptado una prueba de envío. La recepción efectiva de los emails y adjuntos debe revisarse en la bandeja del receptor.
 
-## Formulario
-
-Prepara un correo dirigido a mudaclaro@gmail.com. El visitante debe confirmar el envío en su aplicación de correo. También puede copiar la solicitud manualmente. No hay servidor que almacene solicitudes ni analítica.
+FormSubmit conserva el texto de las solicitudes durante 30 días según su documentación. La web no usa analítica. Consultar https://formsubmit.co/documentation y https://formsubmit.co/privacy.pdf.
