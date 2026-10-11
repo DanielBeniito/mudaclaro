@@ -17,6 +17,11 @@
 <script>const inventory = document.querySelector('#inventory-list');
 let itemSequence = 0;
 const photoState = new Map();
+function invalidateInventoryRequest() {
+  document.querySelector('#email-fallback').hidden = true;
+  document.querySelector('#form-status').textContent = '';
+}
+inventory.addEventListener('input', invalidateInventoryRequest);
 function inventoryPhotos() { return [...photoState.entries()].filter(([card]) => card.isConnected).map(([card, photo]) => ({card, ...photo})); }
 function inventoryLines() {
   const cards = [...inventory.children];
@@ -52,6 +57,7 @@ function addFurniture() {
     const ext = {'image/jpeg':'jpg','image/png':'png','image/webp':'webp'}[file.type];
     const photo = {file, filename:`mueble-${number}.${ext}`, url:URL.createObjectURL(file)};
     photoState.set(card, photo);
+    invalidateInventoryRequest();
     preview.src = photo.url; preview.hidden = false;
     card.querySelector('.remove-photo').hidden = false;
     status.textContent = 'Foto preparada en este dispositivo. Se incluirá en la descarga para adjuntarla al correo.';
@@ -62,12 +68,14 @@ function addFurniture() {
   function clearPhoto() {
     const old = photoState.get(card); if (old) URL.revokeObjectURL(old.url);
     photoState.delete(card); preview.removeAttribute('src'); preview.hidden = true;
+    invalidateInventoryRequest();
     inputs.forEach(input => input.value = ''); card.querySelector('.remove-photo').hidden = true;
     status.textContent = '';
   }
   card.querySelector('.remove-photo').addEventListener('click', clearPhoto);
   card.querySelector('.remove-item').addEventListener('click', () => { clearPhoto(); card.remove(); document.querySelector('#add-furniture').disabled = false; });
   inventory.append(fragment);
+  invalidateInventoryRequest();
   document.querySelector('#add-furniture').disabled = inventory.children.length >= 20;
   card.querySelector('[data-field=nombre]').focus();
 }
