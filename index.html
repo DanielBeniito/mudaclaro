@@ -35,7 +35,7 @@ function inventoryLines() {
       `Materiales: ${materials.join(', ') || 'Sin indicar'}${val('otro') ? ' / ' + val('otro') : ''}`,
       `Medidas (largo × ancho × alto): ${dimensions} cm`, `Observaciones: ${val('notas') || 'Sin indicar'}`,
       `Desmontaje y montaje: ${val('montaje') || 'Sin indicar'}`,
-      `Foto: ${photo ? photo.filename : 'Sin foto'}`];
+      `Foto: ${photo ? photo.file.name + ' (copia ZIP: ' + photo.filename + ')' : 'Sin foto'}`];
   })];
 }
 function addFurniture() {
@@ -50,13 +50,14 @@ function addFurniture() {
   async function choosePhoto(event) {
     const file = event.target.files[0];
     if (!file) return;
+    if (!file.size) { status.textContent = 'La foto está vacía. Selecciona otra imagen.'; event.target.value = ''; return; }
     if (!['image/jpeg','image/png','image/webp'].includes(file.type)) { status.textContent = 'Usa una foto JPG, PNG o WebP. Si tu móvil usa HEIC, conviértela a JPG.'; event.target.value = ''; return; }
     const total = inventoryPhotos().filter(photo => photo.card !== card).reduce((sum,photo) => sum + photo.file.size, 0);
     if (file.size > 5 * 1024 * 1024 || total + file.size > 9 * 1024 * 1024) { status.textContent = 'Máximo 5 MB por foto y 9 MB en total. Elige una foto más pequeña.'; event.target.value = ''; return; }
     const old = photoState.get(card);
     if (old) URL.revokeObjectURL(old.url);
     const ext = {'image/jpeg':'jpg','image/png':'png','image/webp':'webp'}[file.type];
-    const photo = {file, filename:`mueble-${number}.${ext}`, url:URL.createObjectURL(file)};
+    const photo = {file, input:event.target, filename:`mueble-${number}.${ext}`, url:URL.createObjectURL(file)};
     photoState.set(card, photo);
     invalidateInventoryRequest();
     preview.src = photo.url; preview.hidden = false;
@@ -142,9 +143,11 @@ async function sendDirectRequest(body, personal, subject) {
   const email = form.elements.contacto.value.trim();
   if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) add('email',email);
   if (personal) inventoryPhotos().forEach((photo,index) => {
-    const input = document.createElement('input'); input.type = 'file'; input.name = 'attachment' + (index ? '_' + index : '');
-    const transfer = new DataTransfer(); transfer.items.add(new File([photo.file],photo.filename,{type:photo.file.type}));
-    input.files = transfer.files; transport.append(input);
+    // Submit the original browser-selected file input, preserving its native file data.
+    if (!photo.input || !photo.input.files.length || !photo.input.files[0].size) throw new Error('Foto no disponible');
+    photo.input.name = 'attachment' + (index ? '_' + index : '');
+    transport.append(photo.input);
+    add('Foto del mueble ' + (index + 1), photo.file.name);
   });
   document.body.append(transport);
   const button = document.querySelector('#submit-button');
@@ -157,10 +160,12 @@ async function sendDirectRequest(body, personal, subject) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 45000);
   let accepted = false;
+  let nativeSubmission = false;
   try {
     if (personal && inventoryPhotos().length) {
       transport.target = '_blank';
       transport.submit();
+      nativeSubmission = true;
       status.textContent = 'El envío con fotos se ha abierto en otra pestaña. Comprueba allí la confirmación y completa la verificación si aparece. Si ves un error, vuelve a esta página: conservamos los datos y puedes descargar la solicitud y fotos para enviarlas por correo.';
       return;
     }
@@ -179,7 +184,8 @@ async function sendDirectRequest(body, personal, subject) {
     fallback.scrollIntoView({block:'center',behavior:'smooth'});
   } finally {
     clearTimeout(timeout);
-    transport.remove();
+    // Keep native multipart inputs alive while the browser reads their file data.
+    if (!nativeSubmission) transport.remove();
     button.disabled = accepted;
   }
 }
@@ -277,5 +283,6 @@ document.querySelector('#copy-request').addEventListener('click', async () => {
   catch { summary.focus(); summary.select(); document.querySelector('#form-status').textContent = 'Seleccionamos el texto. Puedes copiarlo y pegarlo en tu correo.'; }
 });
 </script></body></html>
+
 
 
