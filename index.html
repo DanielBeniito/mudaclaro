@@ -163,10 +163,10 @@ async function sendDirectRequest(body, personal, subject) {
   let nativeSubmission = false;
   try {
     if (personal && inventoryPhotos().length) {
-      transport.target = '_blank';
+      transport.target = '_self';
       transport.submit();
       nativeSubmission = true;
-      status.textContent = 'El envío con fotos se ha abierto en otra pestaña. Comprueba allí la confirmación y completa la verificación si aparece. Si ves un error, vuelve a esta página: conservamos los datos y puedes descargar la solicitud y fotos para enviarlas por correo.';
+      status.textContent = 'Enviando las fotos en esta misma ventana. Completa la comprobación de seguridad si aparece y espera la confirmación. Si ves un error, usa Atrás para volver al formulario; evita recargar la página de envío.';
       return;
     }
     const response = await fetch('https://formsubmit.co/ajax/hola@mudaclaro.es', {
@@ -283,6 +283,7 @@ document.querySelector('#copy-request').addEventListener('click', async () => {
   catch { summary.focus(); summary.select(); document.querySelector('#form-status').textContent = 'Seleccionamos el texto. Puedes copiarlo y pegarlo en tu correo.'; }
 });
 </script></body></html>
+
 
 
 
