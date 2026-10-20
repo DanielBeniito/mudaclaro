@@ -158,6 +158,12 @@ async function sendDirectRequest(body, personal, subject) {
   const timeout = setTimeout(() => controller.abort(), 45000);
   let accepted = false;
   try {
+    if (personal && inventoryPhotos().length) {
+      transport.target = '_blank';
+      transport.submit();
+      status.textContent = 'El envío con fotos se ha abierto en otra pestaña. Comprueba allí la confirmación y completa la verificación si aparece. Si ves un error, vuelve a esta página: conservamos los datos y puedes descargar la solicitud y fotos para enviarlas por correo.';
+      return;
+    }
     const response = await fetch('https://formsubmit.co/ajax/hola@mudaclaro.es', {
       method:'POST', body:new FormData(transport),
       headers:{Accept:'application/json'}, signal:controller.signal
